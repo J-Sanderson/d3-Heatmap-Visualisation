@@ -13,3 +13,22 @@
   font-family: sans-serif;
   font-size: 11px;
 }
+
+#chart rect {
+  shape-rendering: crispEdges;
+  fill:red;
+  stroke: black;
+}
+
+div.tooltip {	
+  position: absolute;			
+  text-align: center;				
+  padding: 5px;
+  width: 100px;
+  height: 70px;
+  background: white;
+  border: 0px;
+  font-family: sans-serif;
+  font-size: 13px;
+  border: 1px solid black;
+}
