@@ -15,15 +15,24 @@ d3.json(
       "Nov",
       "Dec"
     ];
-    
-    var div = d3.select("body").append("div")	
-    .attr("class", "tooltip")				
-    .style("opacity", 0);
+    var colours = [
+      "5E4FA2",
+      "3288BD",
+      "66C2A5",
+      "ABDDA4",
+      "E6F598",
+      "FFFFBF",
+      "FEE08B",
+      "FDAE61",
+      "F46D43",
+      "D53E4F",
+      "9E0142"
+    ]
 
     var w = 500;
-    var h = 1500;
+    var h = 1600;
     var margin = {
-      top: 20,
+      top: 80,
       bottom: 30,
       left: 40,
       right: 20
@@ -33,9 +42,16 @@ d3.json(
       .select("#chart")
       .attr("width", w)
       .attr("height", h);
+    
+    var colScale = d3.scaleQuantile()
+      .domain([d3.min(data.monthlyVariance, function(d) {
+          return d.variance + data.baseTemperature;
+        }), d3.max(data.monthlyVariance, function(d) {
+          return d.variance + data.baseTemperature;
+        })])
+      .range(colours)
 
-    var yScale = d3
-      .scaleLinear()
+    var yScale = d3.scaleLinear()
       .domain([
         d3.min(data.monthlyVariance, function(d) {
           return d.year;
@@ -46,16 +62,16 @@ d3.json(
       ])
       .range([margin.top, h - margin.bottom]);
 
-    var xScale = d3
-      .scaleBand()
+    var xScale = d3.scaleBand()
       .domain(months)
       .range([margin.left, w - margin.right]);
 
     var yAxis = d3.axisLeft(yScale).tickFormat(d3.timeFormat);
-    var xAxis = d3.axisBottom(xScale);
+    var xAxis = d3.axisBottom(xScale).tickSize(0);
     
     var boxWidth = Math.round((w - (margin.left + margin.right)) / 12);
     var boxHeight = Math.round((h - margin.top - margin.bottom) / (data.monthlyVariance.length / 12));
+    var keyBox = Math.round((w - (margin.left + margin.right)) / colours.length)
 
     svg
       .append("g")
@@ -69,8 +85,36 @@ d3.json(
       .attr("transform", "translate(0," + (h - margin.bottom) + ")")
       .call(xAxis);
     
+    svg.selectAll(".key.rect")
+      .data(colours)
+      .enter()
+      .append("rect")
+      .attr("y", margin.top / 4)
+      .attr("x", function(d, i) {
+        return (margin.left + (i * keyBox));
+      })
+      .attr("width", keyBox)
+      .attr("height", keyBox)
+      .style("fill", function(d) {
+        return d;
+      })
+    
+    var tip = d3.tip().attr("class", "d3-tip").html(function(d){
+      var label = "<p><strong>" +
+                months[d.month - 1] +
+                " "+
+                d.year +
+                "</strong></p><p>" +
+                (d.variance + data.baseTemperature).toFixed(2) +
+                "<br>Variance: " +
+                d.variance +
+                "</p>"
+      return label;
+    })
+    svg.call(tip);
+    
     svg
-      .selectAll("rect")
+      .selectAll(".plot.rect")
       .data(data.monthlyVariance)
       .enter()
       .append("rect")
@@ -82,22 +126,11 @@ d3.json(
       })
       .attr("height", boxHeight)
       .attr("width", boxWidth)
-      .on("mouseover", function(d) {
-        div.transition()		
-          .duration(500)		
-          .style("opacity", 0.8);	
-        div.html("<p><strong>" +
-                months[d.month - 1] +
-                " "+
-                d.year +
-                "</strong></p><p>" +
-                (d.variance + data.baseTemperature).toFixed(2) +
-                "<br>Variance: " +
-                d.variance +
-                "</p>")
-          .style("left", (d3.event.pageX - 50) + "px")
-          .style("top", (d3.event.pageY - 81) + "px")
+      .style("fill", function(d){
+        return colScale(d.variance + data.baseTemperature)
       })
-      
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide);
+    
   }
 );
