@@ -1,5 +1,6 @@
 #chart {
-  border: 1px solid black;
+  font-family: sans-serif;
+  border: 1px solid #000000;
   background-color: #ffffff;
 }
 
@@ -9,14 +10,13 @@
   shape-rendering: crispEdges;
 }
 
-.axis text {
-  font-family: sans-serif;
+.axis text, {
   font-size: 11px;
 }
 
 #chart rect {
   shape-rendering: crispEdges;
-  stroke: black;
+  stroke: #ffffff;
 }
 
 .d3-tip {
